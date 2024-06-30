@@ -141,7 +141,15 @@ async function main() {
       'Get Order by ID': ['GET', '/api/orders/:id', {}],
       'Create Order': ['POST', '/api/orders', { product_id: 1, quantity: 2 }],
       'Update Order': ['PUT', '/api/orders/:id', { status: 'shipped' }],
-      'Delete Order': ['DELETE', '/api/orders/:id', {}]
+      'Delete Order': ['DELETE', '/api/orders/:id', {}],
+      // Retail POS endpoints
+      'Retail POS - Start Transaction': ['POST', '/api/retail/pos/start', { transaction_id: 'tx123' }],
+      'Retail POS - Add Item': ['POST', '/api/retail/pos/add-item', { transaction_id: 'tx123', product_id: 1, quantity: 2 }],
+      'Retail POS - Complete Transaction': ['POST', '/api/retail/pos/complete', { transaction_id: 'tx123', payment_method: 'card' }],
+      // Restaurant POS endpoints
+      'Restaurant POS - Create Order': ['POST', '/api/restaurant/pos/create-order', { table_id: 1, items: [{ product_id: 1, quantity: 2 }] }],
+      'Restaurant POS - Update Order': ['PUT', '/api/restaurant/pos/update-order/:order_id', { items: [{ product_id: 1, quantity: 3 }] }],
+      'Restaurant POS - Close Order': ['POST', '/api/restaurant/pos/close-order', { order_id: 'order123', payment_method: 'cash' }]
     };
 
     for (const [name, [method, url, body]] of Object.entries(endpoints)) {
