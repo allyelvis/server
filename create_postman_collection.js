@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { exec } = require('child_process');
 
 // Replace these variables with your actual values
 const API_KEY = 'YOUR_POSTMAN_API_KEY';
@@ -39,7 +40,7 @@ async function addRequestToCollection(collectionId, requestName, method, url, bo
         raw: url,
         protocol: 'http',
         host: ['localhost'],
-        path: url.split('/')
+        path: url.split('/').filter(Boolean)
       }
     },
     name: requestName
@@ -53,7 +54,75 @@ async function addRequestToCollection(collectionId, requestName, method, url, bo
   });
 }
 
-// Main function to create the collection and add requests
+// Function to install Postman CLI
+function installPostmanCLI() {
+  return new Promise((resolve, reject) => {
+    exec('curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh', (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error installing Postman CLI: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+// Function to login to Postman CLI
+function postmanLogin(apiKey) {
+  return new Promise((resolve, reject) => {
+    exec(`postman login --with-api-key ${apiKey}`, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error logging in to Postman CLI: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+// Function to run the collection using Postman CLI
+function runCollection(collectionId) {
+  return new Promise((resolve, reject) => {
+    exec(`postman collection run ${collectionId}`, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error running collection: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+// Function to lint the API using Postman CLI
+function lintAPI(apiLintId) {
+  return new Promise((resolve, reject) => {
+    exec(`postman api lint ${apiLintId}`, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error linting API: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+// Main function to create the collection, add requests, and run the collection
 async function main() {
   try {
     const collectionId = await createCollection(COLLECTION_NAME);
@@ -81,9 +150,24 @@ async function main() {
 
     console.log('All endpoints added successfully!');
 
-    // Here you can add the code to install and use Postman CLI if needed.
+    // Install Postman CLI
+    await installPostmanCLI();
+    console.log('Postman CLI installed successfully!');
+
+    // Login to Postman CLI
+    await postmanLogin(API_KEY);
+    console.log('Logged in to Postman CLI successfully!');
+
+    // Run the created collection
+    const runResult = await runCollection(collectionId);
+    console.log('Collection run result:', runResult);
+
+    // Perform API linting
+    const lintResult = await lintAPI(API_LINT_ID);
+    console.log('API lint result:', lintResult);
+
   } catch (error) {
-    console.error('Error:', error.response ? error.response.data : error.message);
+    console.error('Error:', error);
   }
 }
 
