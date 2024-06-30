@@ -1,0 +1,12 @@
+{
+  "name": "commerce-app",
+  "version": "1.0.0",
+  "description": "Commerce app with retail and restaurant POS",
+  "main": "index.js",
+  "scripts": {
+    "create-postman-collection": "node postman/create_postman_collection.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}
